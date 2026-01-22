@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wine Flavor Map</title>
+  <style>
+    :root { --bg:#ffffff; --ink:#111; --muted:#666; --grid:#e8e8e8; --accent:#b00020; }
+    body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
+    .wrap { max-width: 980px; margin: 18px auto; padding: 0 14px; }
+    h1 { font-size: 20px; margin: 0 0 10px; }
+    .row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+    .card { border:1px solid #eee; border-radius: 14px; padding: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.05); background:#fff; }
+    .left { flex: 1 1 560px; }
+    .right { flex: 1 1 320px; }
+    canvas { width: 100%; height: 520px; display:block; border-radius: 12px; background: #fff; }
+    label { display:block; font-size: 12px; color:var(--muted); margin-top: 10px; }
+    input, button, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; }
+    button { cursor:pointer; background:#111; color:#fff; border:none; margin-top: 10px; }
+    button.secondary { background:#f4f4f4; color:#111; border:1px solid #ddd; }
+    .tiny { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pill { display:inline-block; padding: 4px 8px; border-radius:999px; background:#f3f3f3; font-size: 12px; margin-right: 6px; }
+    .list { max-height: 210px; overflow:auto; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; }
+    .item { display:flex; justify-content:space-between; gap:8px; align-items:center; padding: 6px 0; }
+    .item button { width:auto; padding: 6px 10px; margin:0; border-radius: 10px; }
+    .item .name { font-size: 14px; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 12px; background:#f6f6f6; border:1px solid #eee; border-bottom-width:2px; padding:2px 6px; border-radius:6px; }
+    .ok { color:#0a7; font-weight:700; }
+    .warn { color:#c60; font-weight:700; }
+    .bad { color:#b00020; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🍷 Wine Flavor Map — Dry↔Sweet and Light↔Bold</h1>
+    <div class="row">
+      <div class="card left">
+        <canvas id="c"></canvas>
+        <div class="tiny" style="margin-top:10px;">
+          <span class="pill">Tip</span>
+          Tap/click to place <b>You</b>. Drag points anytime.
+        </div>
+      </div>
+
+      <div class="card right">
+        <div class="tiny">
+          Axes: X = <b>Dry (left)</b> → <b>Sweet (right)</b>, Y = <b>Light (bottom)</b> → <b>Bold (top)</b>.
+          <br>Coordinates range from <b>-5 to +5</b>.
+        </div>
+
+        <label>🔎 Search & auto-place (Option A)</label>
+        <input id="q" placeholder="e.g., chenin blanc loire / malbec mendoza / prosecco extra dry" />
+        <button id="search">Auto-place from dictionary</button>
+        <div class="tiny" id="matchStatus" style="margin-top:8px;"></div>
+
+        <hr style="border:none;border-top:1px solid #eee;margin:14px 0;">
+
+        <label>Point type</label>
+        <select id="ptype">
+          <option value="wine">Wine</option>
+          <option value="you">You (single)</option>
+        </select>
+
+        <label>Name</label>
+        <input id="name" placeholder="e.g., Chenin Blanc (Loire)" />
+
+        <div class="grid2">
+          <div>
+            <label>X (Dry ←→ Sweet)</label>
+            <input id="x" type="number" step="0.1" min="-5" max="5" value="0">
+          </div>
+          <div>
+            <label>Y (Light ↓↑ Bold)</label>
+            <input id="y" type="number" step="0.1" min="-5" max="5" value="0">
+          </div>
+        </div>
+
+        <button id="add">Add / Update Point</button>
+        <button id="reset" class="secondary">Reset to presets</button>
+
+        <div class="list" id="list"></div>
+
+        <div class="tiny" style="margin-top:10px;">
+          <span class="pill">How Option A works</span>
+          The search matches keywords in your query to a small built-in list (you can expand it over time).
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ======= OPTION A DICTIONARY (EDIT THIS LIST) =======
+  // Rule of thumb: add 2–8 tags per wine style so search finds it.
+  const WINE_DB = [
+    { name:"Pinot Grigio (Italy)", tags:["pinot grigio","grigio","italy","veneto","friuli"], x:-1.8, y:-2.6 },
+    { name:"Pinot Gris (Alsace/Oregon)", tags:["pinot gris","gris","alsace","oregon"], x:0.4, y:-1.2 },
+
+    { name:"Chardonnay (unoaked)", tags:["chardonnay unoaked","unoaked chardonnay","chardonnay steel","chablis-style"], x:-0.2, y:-1.4 },
+    { name:"Chardonnay (oaked)", tags:["chardonnay oaked","buttery chardonnay","oak chardonnay"], x:0.6, y:-0.2 },
+
+    { name:"Riesling (off-dry)", tags:["riesling off dry","riesling off-dry","riesling kabinett","kabinett"], x:2.0, y:-1.0 },
+    { name:"Moscato", tags:["moscato","muscat"], x:3.6, y:-2.0 },
+
+    { name:"Chenin Blanc (Loire, dry/off-dry)", tags:["chenin blanc","chenin","loire","voulay","vouvray","anjou","saumur"], x:0.2, y:-1.0 },
+
+    { name:"Malbec (Argentina)", tags:["malbec","argentina","mendoza"], x:0.5, y:2.0 },
+    { name:"Malbec (Cahors, firmer)", tags:["malbec cahors","cahors"], x:-1.0, y:2.6 },
+
+    { name:"Merlot (soft)", tags:["merlot"], x:0.0, y:1.6 },
+    { name:"Cabernet Sauvignon (bold)", tags:["cabernet sauvignon","cabernet","cab"], x:-1.0, y:3.2 },
+
+    { name:"Prosecco (Extra Dry)", tags:["prosecco extra dry","prosecco"], x:2.0, y:-2.0 },
+    { name:"Cava (Brut)", tags:["cava brut","cava"], x:-1.2, y:-2.0 },
+
+    { name:"Vernaccia di San Gimignano", tags:["vernaccia","san gimignano"], x:-2.2, y:-1.6 },
+    { name:"Campania Bianco IGT", tags:["campania bianco","campania","fiano","greco","falanghina"], x:-1.6, y:-1.2 },
+  ];
+
+  // ======= CANVAS SETUP =======
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const world = { minX:-5, maxX:5, minY:-5, maxY:5 };
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw();
+  }
+  window.addEventListener('resize', resize);
+
+  function w2s(x, y) {
+    const W = canvas.getBoundingClientRect().width;
+    const H = canvas.getBoundingClientRect().height;
+    const px = (x - world.minX) / (world.maxX - world.minX) * W;
+    const py = H - (y - world.minY) / (world.maxY - world.minY) * H;
+    return { x:px, y:py };
+  }
+  function s2w(px, py) {
+    const W = canvas.getBoundingClientRect().width;
+    const H = canvas.getBoundingClientRect().height;
+    const x = world.minX + (px / W) * (world.maxX - world.minX);
+    const y = world.minY + ((H - py) / H) * (world.maxY - world.minY);
+    return { x, y };
+  }
+
+  const state = { you: null, wines: [] };
+
+  function presets() {
+    state.you = { id:'you', type:'you', name:'You', x:1.5, y:-1.0 };
+    state.wines = [
+      { id: crypto.randomUUID(), type:'wine', name:'Pinot Grigio', x:-1.5, y:-2.5 },
+      { id: crypto.randomUUID(), type:'wine', name:'Chardonnay', x:0.5, y:-1.5 },
+      { id: crypto.randomUUID(), type:'wine', name:'Riesling (off-dry)', x:2.0, y:-1.0 },
+      { id: crypto.randomUUID(), type:'wine', name:'Moscato', x:3.5, y:-2.0 },
+      { id: crypto.randomUUID(), type:'wine', name:'Malbec (Argentina)', x:0.5, y:2.0 },
+      { id: crypto.randomUUID(), type:'wine', name:'Cabernet Sauvignon', x:-1.0, y:3.0 },
+      { id: crypto.randomUUID(), type:'wine', name:'Sauvignon Blanc', x:-3.0, y:-2.0 },
+    ];
+  }
+  presets();
+
+  function drawAxes(W, H) {
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#e8e8e8';
+    for (let i=1;i<10;i++){
+      const gx = i/10 * W;
+      const gy = i/10 * H;
+      ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
+    }
+
+    const mid = w2s(0,0);
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(mid.x, 0); ctx.lineTo(mid.x, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, mid.y); ctx.lineTo(W, mid.y); ctx.stroke();
+
+    ctx.fillStyle = '#111';
+    ctx.font = '700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('← Drier', W*0.25, H - 14);
+    ctx.fillText('Sweeter →', W*0.75, H - 14);
+
+    ctx.save();
+    ctx.translate(14, H*0.25);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('Bolder ↑', 0, 0);
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(14, H*0.75);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('Light ↓', 0, 0);
+    ctx.restore();
+  }
+
+  function drawPoint(p) {
+    const { x, y } = w2s(p.x, p.y);
+    const r = p.type === 'you' ? 9 : 6;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = (p.type === 'you') ? '#b00020' : '#777';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#111';
+    ctx.stroke();
+
+    ctx.font = '600 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.fillStyle = (p.type === 'you') ? '#b00020' : '#111';
+    ctx.textAlign = 'center';
+    ctx.fillText(p.name, x, y - 10);
+  }
+
+  function draw() {
+    const W = canvas.getBoundingClientRect().width;
+    const H = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0,0,W,H);
+    drawAxes(W,H);
+    state.wines.forEach(drawPoint);
+    drawPoint(state.you);
+  }
+
+  function allPoints() { return [ ...state.wines, state.you ]; }
+
+  function hitTest(mx, my) {
+    const pts = allPoints();
+    for (let i=pts.length-1;i>=0;i--) {
+      const p = pts[i];
+      const s = w2s(p.x, p.y);
+      const r = (p.type === 'you') ? 12 : 10;
+      const dx = mx - s.x, dy = my - s.y;
+      if (dx*dx + dy*dy <= r*r) return p;
+    }
+    return null;
+  }
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  let dragging = null;
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const p = hitTest(mx, my);
+    if (p) dragging = p;
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const w = s2w(mx, my);
+    dragging.x = clamp(w.x, -5, 5);
+    dragging.y = clamp(w.y, -5, 5);
+    syncFormIfSelected(dragging);
+    draw(); renderList();
+  });
+  window.addEventListener('mouseup', () => dragging = null);
+
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    if (hitTest(mx, my)) return;
+    const w = s2w(mx, my);
+    state.you.x = clamp(w.x, -5, 5);
+    state.you.y = clamp(w.y, -5, 5);
+    draw(); renderList();
+  });
+
+  // ======= UI =======
+  const ptype = document.getElementById('ptype');
+  const nameEl = document.getElementById('name');
+  const xEl = document.getElementById('x');
+  const yEl = document.getElementById('y');
+  const addBtn = document.getElementById('add');
+  const resetBtn = document.getElementById('reset');
+  const listEl = document.getElementById('list');
+
+  const qEl = document.getElementById('q');
+  const searchBtn = document.getElementById('search');
+  const matchStatus = document.getElementById('matchStatus');
+
+  let selectedId = null;
+
+  function syncFormIfSelected(p) {
+    if (!p || p.id !== selectedId) return;
+    ptype.value = p.type;
+    nameEl.value = p.name;
+    xEl.value = (+p.x).toFixed(1);
+    yEl.value = (+p.y).toFixed(1);
+  }
+
+  function selectPoint(id) {
+    selectedId = id;
+    const p = (id === 'you') ? state.you : state.wines.find(w => w.id === id);
+    if (!p) return;
+    ptype.value = p.type;
+    nameEl.value = p.name;
+    xEl.value = (+p.x).toFixed(1);
+    yEl.value = (+p.y).toFixed(1);
+  }
+
+  function deleteWine(id) {
+    state.wines = state.wines.filter(w => w.id !== id);
+    if (selectedId === id) selectedId = null;
+    draw(); renderList();
+  }
+
+  addBtn.addEventListener('click', () => {
+    const type = ptype.value;
+    const nm = (nameEl.value || '').trim() || (type === 'you' ? 'You' : 'Wine');
+    const x = clamp(parseFloat(xEl.value || '0'), -5, 5);
+    const y = clamp(parseFloat(yEl.value || '0'), -5, 5);
+
+    if (type === 'you') {
+      state.you.name = nm; state.you.x = x; state.you.y = y;
+      selectedId = 'you';
+    } else {
+      if (selectedId && selectedId !== 'you') {
+        const w = state.wines.find(z => z.id === selectedId);
+        if (w) { w.name = nm; w.x = x; w.y = y; }
+      } else {
+        state.wines.push({ id: crypto.randomUUID(), type:'wine', name:nm, x, y });
+      }
+    }
+    draw(); renderList();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    presets();
+    selectedId = null;
+    nameEl.value = '';
+    xEl.value = 0; yEl.value = 0;
+    ptype.value = 'wine';
+    matchStatus.textContent = '';
+    draw(); renderList();
+  });
+
+  function tokenize(s){
+    return (s || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean);
+  }
+
+  function scoreEntry(queryTokens, entry){
+    // Score = how many tags match (partial word matches allowed)
+    let score = 0;
+    const q = queryTokens.join(' ');
+    for (const t of entry.tags) {
+      const tag = t.toLowerCase();
+      if (q.includes(tag)) score += 3;       // full tag phrase hit
+      else {
+        // partial token hit
+        const tagTokens = tokenize(tag);
+        const hit = tagTokens.some(tt => queryTokens.includes(tt));
+        if (hit) score += 1;
+      }
+    }
+    return score;
+  }
+
+  function autoPlaceFromDictionary(query){
+    const tokens = tokenize(query);
+    if (tokens.length === 0) return null;
+
+    let best = null, bestScore = 0;
+    for (const e of WINE_DB) {
+      const sc = scoreEntry(tokens, e);
+      if (sc > bestScore) { bestScore = sc; best = e; }
+    }
+    if (!best || bestScore <= 0) return null;
+
+    // confidence label
+    let confidence = 'low';
+    if (bestScore >= 6) confidence = 'high';
+    else if (bestScore >= 3) confidence = 'medium';
+
+    return { ...best, confidence, score: bestScore };
+  }
+
+  function upsertWinePoint(name, x, y){
+    // If wine name already exists, update it; else add
+    const existing = state.wines.find(w => w.name.toLowerCase() === name.toLowerCase());
+    if (existing) { existing.x = x; existing.y = y; return existing.id; }
+    const id = crypto.randomUUID();
+    state.wines.push({ id, type:'wine', name, x, y });
+    return id;
+  }
+
+  searchBtn.addEventListener('click', () => {
+    const q = qEl.value.trim();
+    const hit = autoPlaceFromDictionary(q);
+    if (!hit) {
+      matchStatus.innerHTML = `<span class="bad">No match.</span> Add it manually once, then add tags to the dictionary.`;
+      return;
+    }
+
+    const id = upsertWinePoint(hit.name, hit.x, hit.y);
+    selectPoint(id);
+
+    const cls = hit.confidence === 'high' ? 'ok' : (hit.confidence === 'medium' ? 'warn' : 'bad');
+    matchStatus.innerHTML =
+      `Match: <b>${escapeHtml(hit.name)}</b> → x=${hit.x.toFixed(1)}, y=${hit.y.toFixed(1)} ` +
+      `(<span class="${cls}">${hit.confidence} confidence</span>)`;
+
+    draw(); renderList();
+  });
+
+  function renderList() {
+    const items = [{...state.you, label:'You'}, ...state.wines.map(w => ({...w, label:'Wine'}))];
+    listEl.innerHTML = `
+      <div class="tiny"><span class="pill">Points</span>
+        Click <span class="kbd">Edit</span> to load values; drag points on the map any time.
+      </div>
+      ${items.map(p => `
+        <div class="item">
+          <div>
+            <div class="name"><b>${escapeHtml(p.name)}</b> <span class="tiny">(${p.label})</span></div>
+            <div class="tiny">x=${p.x.toFixed(1)}, y=${p.y.toFixed(1)}</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="secondary" data-edit="${p.id}">Edit</button>
+            ${p.id !== 'you' ? `<button class="secondary" data-del="${p.id}">Del</button>` : ``}
+          </div>
+        </div>
+      `).join('')}
+    `;
+    listEl.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => selectPoint(btn.dataset.edit)));
+    listEl.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => deleteWine(btn.dataset.del)));
+  }
+
+  function escapeHtml(s){
+    return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  renderList();
+  resize();
+})();
+</script>
+</body>
+</html>
