@@ -46,6 +46,15 @@
     .bad{ color:#b00020; font-weight:700; }
     .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
           font-size: 12px; background:#f6f6f6; border:1px solid #eee; border-bottom-width:2px; padding:2px 6px; border-radius:6px; }
+
+    /* ✅ Phone layout: stack + make the map tall */
+    @media (max-width: 720px){
+      .wrap{ margin: 12px auto; }
+      .row{ flex-direction: column; }
+      .left, .right{ flex: 1 1 auto; }
+      canvas{ height: 72vh; } /* use more screen for the map */
+      h1{ font-size: 18px; }
+    }
   </style>
 </head>
 <body>
@@ -66,7 +75,8 @@
 
         <div class="tiny" style="margin-top:10px;">
           <span class="pill">How to use</span>
-          Tap/click to move <b>Me</b>. Drag points to adjust. Labels are shown for <b>anchors</b> and the <b>selected point</b> only (to avoid clutter).
+          Tap/click to move <b>Me</b>. Drag points to adjust.
+          On phone, labels show only for <b>Me</b> and the <b>selected point</b> to avoid clutter.
         </div>
       </div>
 
@@ -121,7 +131,7 @@
 
         <div class="tiny" style="margin-top:10px;">
           <span class="pill">Tip</span>
-          On phone: tap a point → it becomes “selected” and its label shows. Tap empty space → move <b>Me</b>.
+          Tap a point → it becomes “selected” and its label shows. Tap empty space → move <b>Me</b>.
         </div>
       </div>
     </div>
@@ -194,7 +204,6 @@
   const world = { minX:-10, maxX:10, minY:-10, maxY:10 };
 
   // Preference zone (ellipse): tuned to your stated profile
-  // Fresh + fruity + light, avoiding extremes of dry/sweet
   const PREF = { cx: 2.0, cy: -2.0, rx: 3.0, ry: 3.0 };
 
   // UI elements
@@ -220,6 +229,11 @@
   let selectedId = null;
   let dragging = null;
 
+  // Phone detection (used for label rules)
+  function isPhone(){
+    return window.matchMedia("(max-width: 720px)").matches;
+  }
+
   // =========================
   // Helpers
   // =========================
@@ -229,7 +243,7 @@
     if (p.type === 'me') return getCss('--me');
     if (p.cat === 'red') return getCss('--redWine');
     if (p.cat === 'sparkling') return getCss('--spark');
-    // rose and white both look like "light" category on purpose; if you want pink, tell me.
+    // rose and white both look light; can make rose pink if you want.
     return getCss('--whiteWine');
   }
 
@@ -248,7 +262,7 @@
     const q = queryTokens.join(' ');
     for (const t of entry.tags) {
       const tag = t.toLowerCase();
-      if (q.includes(tag)) score += 4; // strong phrase hit
+      if (q.includes(tag)) score += 4;
       else {
         const tagTokens = tokenize(tag);
         const hit = tagTokens.some(tt => queryTokens.includes(tt));
@@ -388,7 +402,7 @@
     ctx.fillText('Light ↓', 0, 0);
     ctx.restore();
 
-    // Tick-ish labels (minimal, non-clutter)
+    // Minimal ticks
     ctx.font = '600 11px system-ui, -apple-system, Segoe UI, Roboto, Arial';
     ctx.fillStyle = '#333';
     const ticks = [-10,-5,0,5,10];
@@ -447,8 +461,13 @@
     ctx.strokeStyle = '#111';
     ctx.stroke();
 
-    // Labels: anchors + selected + Me only (to avoid clutter)
-    const showLabel = (p.type === 'me') || (!!p.anchor) || (p.id === selectedId);
+    // ✅ De-clutter labels:
+    // phone: label only Me + selected point
+    // desktop: anchors + selected + Me
+    const showLabel = isPhone()
+      ? (p.type === 'me') || (p.id === selectedId)
+      : (p.type === 'me') || (!!p.anchor) || (p.id === selectedId);
+
     if (showLabel) {
       ctx.font = '600 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
       ctx.fillStyle = '#111';
@@ -464,10 +483,7 @@
     drawAxes(W,H);
     drawPreferenceZone();
 
-    // Wines
     state.wines.forEach(p => { if (shouldRenderPoint(p)) drawPoint(p); });
-
-    // Me on top
     drawPoint(state.me);
   }
 
@@ -478,8 +494,6 @@
 
   function hitTest(mx, my) {
     const pts = allPoints().filter(shouldRenderPoint);
-    // make sure Me gets priority
-    pts.sort((a,b) => (a.type === 'me' ? 1 : 0) - (b.type === 'me' ? 1 : 0));
     for (let i=pts.length-1;i>=0;i--) {
       const p = pts[i];
       const s = w2s(p.x, p.y);
@@ -563,8 +577,7 @@
 
   function deleteWine(id){
     const w = state.wines.find(x => x.id === id);
-    // Don't delete anchors (keep anchor-only stable)
-    if (w && w.anchor) return;
+    if (w && w.anchor) return; // protect anchors
     state.wines = state.wines.filter(x => x.id !== id);
     if (selectedId === id) selectedId = null;
     draw(); renderList();
@@ -580,7 +593,6 @@
       const w = state.wines.find(z => z.id === selectedId);
       if (w && !w.anchor) { w.name = nm; w.x = x; w.y = y; w.cat = cat; }
       else {
-        // if selected is anchor or none, add a new non-anchor point
         const id = upsertWinePoint(nm, x, y, cat, false);
         selectedId = id;
       }
@@ -611,7 +623,6 @@
       matchStatus.innerHTML = `<span class="bad">No match.</span> Try a simpler keyword (e.g., “rioja”, “chenin”, “prosecco”).`;
       return;
     }
-    // Add as non-anchor (so anchors-only view stays clean unless you toggle it off)
     const id = upsertWinePoint(hit.name, hit.x, hit.y, hit.cat, false);
     selectedId = id;
 
@@ -625,7 +636,6 @@
   });
 
   function renderList(){
-    // Show anchors + any added non-anchors, but with anchors protected.
     const winesSorted = [...state.wines].sort((a,b) => (b.anchor===true) - (a.anchor===true) || a.name.localeCompare(b.name));
     const items = [
       { ...state.me, label:'Me', anchor:true },
@@ -653,12 +663,8 @@
       `).join('')}
     `;
 
-    listEl.querySelectorAll('[data-edit]').forEach(btn => {
-      btn.addEventListener('click', () => selectPoint(btn.dataset.edit));
-    });
-    listEl.querySelectorAll('[data-del]').forEach(btn => {
-      btn.addEventListener('click', () => deleteWine(btn.dataset.del));
-    });
+    listEl.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => selectPoint(btn.dataset.edit)));
+    listEl.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => deleteWine(btn.dataset.del)));
   }
 
   // =========================
