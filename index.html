@@ -5,30 +5,40 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Wine Flavor Map</title>
   <style>
-    :root { --bg:#ffffff; --ink:#111; --muted:#666; --grid:#e8e8e8; --accent:#b00020; }
-    body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
-    .wrap { max-width: 980px; margin: 18px auto; padding: 0 14px; }
-    h1 { font-size: 20px; margin: 0 0 10px; }
-    .row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
-    .card { border:1px solid #eee; border-radius: 14px; padding: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.05); background:#fff; }
-    .left { flex: 1 1 560px; }
-    .right { flex: 1 1 320px; }
-    canvas { width: 100%; height: 520px; display:block; border-radius: 12px; background: #fff; }
-    label { display:block; font-size: 12px; color:var(--muted); margin-top: 10px; }
-    input, button, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; }
-    button { cursor:pointer; background:#111; color:#fff; border:none; margin-top: 10px; }
-    button.secondary { background:#f4f4f4; color:#111; border:1px solid #ddd; }
-    .tiny { font-size: 12px; color: var(--muted); line-height: 1.35; }
-    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .pill { display:inline-block; padding: 4px 8px; border-radius:999px; background:#f3f3f3; font-size: 12px; margin-right: 6px; }
-    .list { max-height: 210px; overflow:auto; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; }
-    .item { display:flex; justify-content:space-between; gap:8px; align-items:center; padding: 6px 0; }
-    .item button { width:auto; padding: 6px 10px; margin:0; border-radius: 10px; }
-    .item .name { font-size: 14px; }
-    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 12px; background:#f6f6f6; border:1px solid #eee; border-bottom-width:2px; padding:2px 6px; border-radius:6px; }
-    .ok { color:#0a7; font-weight:700; }
-    .warn { color:#c60; font-weight:700; }
-    .bad { color:#b00020; font-weight:700; }
+    :root{
+      --bg:#ffffff; --ink:#111; --muted:#666; --grid:#e8e8e8;
+      --accent:#b00020;        /* you */
+      --whiteWine:#f5f5f5;     /* white */
+      --redWine:#7a0019;       /* red */
+      --spark:#c9a227;         /* sparkling */
+      --stroke:#111;
+    }
+    body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+    .wrap{ max-width:980px; margin:18px auto; padding:0 14px; }
+    h1{ font-size:20px; margin:0 0 10px; }
+    .row{ display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+    .card{ border:1px solid #eee; border-radius:14px; padding:12px; box-shadow:0 4px 16px rgba(0,0,0,.05); background:#fff; }
+    .left{ flex:1 1 560px; }
+    .right{ flex:1 1 320px; }
+    canvas{ width:100%; height:520px; display:block; border-radius:12px; background:#fff; }
+    label{ display:block; font-size:12px; color:var(--muted); margin-top:10px; }
+    input,button,select{ width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-size:14px; box-sizing:border-box; }
+    button{ cursor:pointer; background:#111; color:#fff; border:none; margin-top:10px; }
+    button.secondary{ background:#f4f4f4; color:#111; border:1px solid #ddd; }
+    .tiny{ font-size:12px; color:var(--muted); line-height:1.35; }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .pill{ display:inline-block; padding:4px 8px; border-radius:999px; background:#f3f3f3; font-size:12px; margin-right:6px; }
+    .list{ max-height:210px; overflow:auto; margin-top:10px; border-top:1px dashed #eee; padding-top:10px; }
+    .item{ display:flex; justify-content:space-between; gap:8px; align-items:center; padding:6px 0; }
+    .item button{ width:auto; padding:6px 10px; margin:0; border-radius:10px; }
+    .item .name{ font-size:14px; }
+    .kbd{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace; font-size:12px; background:#f6f6f6; border:1px solid #eee; border-bottom-width:2px; padding:2px 6px; border-radius:6px; }
+    .ok{ color:#0a7; font-weight:700; }
+    .warn{ color:#c60; font-weight:700; }
+    .bad{ color:#b00020; font-weight:700; }
+    .legend{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .swatch{ display:inline-flex; align-items:center; gap:6px; }
+    .dot{ width:12px; height:12px; border-radius:999px; border:2px solid var(--stroke); display:inline-block; }
   </style>
 </head>
 <body>
@@ -37,6 +47,15 @@
     <div class="row">
       <div class="card left">
         <canvas id="c"></canvas>
+
+        <div class="legend tiny">
+          <span class="swatch"><span class="dot" style="background:var(--whiteWine)"></span>White</span>
+          <span class="swatch"><span class="dot" style="background:var(--redWine)"></span>Red</span>
+          <span class="swatch"><span class="dot" style="background:var(--spark)"></span>Sparkling</span>
+          <span class="swatch"><span class="dot" style="background:var(--accent)"></span>You</span>
+          <span class="swatch"><span class="dot" style="background:rgba(176,0,32,.12); border-style:dashed"></span>Your zone</span>
+        </div>
+
         <div class="tiny" style="margin-top:10px;">
           <span class="pill">Tip</span>
           Tap/click to place <b>You</b>. Drag points anytime.
@@ -54,12 +73,24 @@
         <button id="search">Auto-place from dictionary</button>
         <div class="tiny" id="matchStatus" style="margin-top:8px;"></div>
 
+        <label style="margin-top:12px;">
+          <input id="toggleZone" type="checkbox" checked style="width:auto; transform:scale(1.05); margin-right:8px;" />
+          Show my preference zone
+        </label>
+
         <hr style="border:none;border-top:1px solid #eee;margin:14px 0;">
 
         <label>Point type</label>
         <select id="ptype">
           <option value="wine">Wine</option>
           <option value="you">You (single)</option>
+        </select>
+
+        <label>Wine category (for color)</label>
+        <select id="wcat">
+          <option value="white">White</option>
+          <option value="red">Red</option>
+          <option value="sparkling">Sparkling</option>
         </select>
 
         <label>Name</label>
@@ -82,8 +113,8 @@
         <div class="list" id="list"></div>
 
         <div class="tiny" style="margin-top:10px;">
-          <span class="pill">How Option A works</span>
-          The search matches keywords in your query to a small built-in list (you can expand it over time).
+          <span class="pill">Your zone</span>
+          Shaded area ≈ your stated preference: <b>fresh + fruity + light</b>, avoiding extremes of dry/sweet.
         </div>
       </div>
     </div>
@@ -91,37 +122,57 @@
 
 <script>
 (() => {
-  // ======= OPTION A DICTIONARY (EDIT THIS LIST) =======
-  // Rule of thumb: add 2–8 tags per wine style so search finds it.
+  // ======= 25-entry Option A dictionary (with categories) =======
+  // cat: "white" | "red" | "sparkling"
   const WINE_DB = [
-    { name:"Pinot Grigio (Italy)", tags:["pinot grigio","grigio","italy","veneto","friuli"], x:-1.8, y:-2.6 },
-    { name:"Pinot Gris (Alsace/Oregon)", tags:["pinot gris","gris","alsace","oregon"], x:0.4, y:-1.2 },
+    // LIGHT / FRESH WHITES
+    { name:"Pinot Grigio (Italy)", cat:"white", tags:["pinot grigio","grigio","italy","veneto","friuli"], x:-1.8, y:-2.6 },
+    { name:"Albariño (Spain)", cat:"white", tags:["albarino","albariño","rias baixas"], x:-1.2, y:-2.0 },
+    { name:"Verdejo (Spain)", cat:"white", tags:["verdejo","rueda"], x:-1.0, y:-1.8 },
+    { name:"Sauvignon Blanc (Loire/NZ)", cat:"white", tags:["sauvignon blanc","sancerre","marlborough"], x:-3.0, y:-2.0 },
+    { name:"Vernaccia di San Gimignano", cat:"white", tags:["vernaccia","san gimignano"], x:-2.2, y:-1.6 },
 
-    { name:"Chardonnay (unoaked)", tags:["chardonnay unoaked","unoaked chardonnay","chardonnay steel","chablis-style"], x:-0.2, y:-1.4 },
-    { name:"Chardonnay (oaked)", tags:["chardonnay oaked","buttery chardonnay","oak chardonnay"], x:0.6, y:-0.2 },
+    // BALANCED / AROMATIC WHITES
+    { name:"Chenin Blanc (Loire)", cat:"white", tags:["chenin blanc","chenin","vouvray","anjou","saumur"], x:0.2, y:-1.0 },
+    { name:"Riesling (Off-Dry, Kabinett)", cat:"white", tags:["riesling off dry","riesling kabinett","kabinett"], x:2.0, y:-1.0 },
+    { name:"Gewürztraminer", cat:"white", tags:["gewurztraminer","gewürztraminer"], x:2.8, y:-0.8 },
+    { name:"Pinot Gris (Alsace/Oregon)", cat:"white", tags:["pinot gris","alsace","oregon gris"], x:0.4, y:-1.2 },
+    { name:"Viognier", cat:"white", tags:["viognier"], x:0.8, y:-0.5 },
 
-    { name:"Riesling (off-dry)", tags:["riesling off dry","riesling off-dry","riesling kabinett","kabinett"], x:2.0, y:-1.0 },
-    { name:"Moscato", tags:["moscato","muscat"], x:3.6, y:-2.0 },
+    // CHARDONNAY STYLES
+    { name:"Chardonnay (Unoaked)", cat:"white", tags:["unoaked chardonnay","chardonnay steel","chablis-style"], x:-0.2, y:-1.4 },
+    { name:"Chardonnay (Oaked)", cat:"white", tags:["oaked chardonnay","buttery chardonnay"], x:0.6, y:-0.2 },
 
-    { name:"Chenin Blanc (Loire, dry/off-dry)", tags:["chenin blanc","chenin","loire","voulay","vouvray","anjou","saumur"], x:0.2, y:-1.0 },
+    // SPARKLING
+    { name:"Prosecco (Extra Dry)", cat:"sparkling", tags:["prosecco extra dry","prosecco"], x:2.0, y:-2.0 },
+    { name:"Cava (Brut)", cat:"sparkling", tags:["cava brut","cava"], x:-1.2, y:-2.0 },
+    { name:"Champagne (Brut)", cat:"sparkling", tags:["champagne brut","champagne"], x:-1.5, y:-1.5 },
 
-    { name:"Malbec (Argentina)", tags:["malbec","argentina","mendoza"], x:0.5, y:2.0 },
-    { name:"Malbec (Cahors, firmer)", tags:["malbec cahors","cahors"], x:-1.0, y:2.6 },
+    // LIGHT / SMOOTH REDS
+    { name:"Pinot Noir (Light)", cat:"red", tags:["pinot noir","burgundy red"], x:-1.2, y:0.5 },
+    { name:"Gamay (Beaujolais)", cat:"red", tags:["gamay","beaujolais"], x:-0.5, y:0.2 },
 
-    { name:"Merlot (soft)", tags:["merlot"], x:0.0, y:1.6 },
-    { name:"Cabernet Sauvignon (bold)", tags:["cabernet sauvignon","cabernet","cab"], x:-1.0, y:3.2 },
+    // MEDIUM / FRUIT-FORWARD REDS
+    { name:"Merlot (Soft)", cat:"red", tags:["merlot"], x:0.0, y:1.6 },
+    { name:"Grenache / Garnacha", cat:"red", tags:["grenache","garnacha"], x:0.5, y:1.4 },
+    { name:"Tempranillo (Rioja)", cat:"red", tags:["tempranillo","rioja"], x:-0.5, y:1.8 },
+    { name:"Zinfandel (California)", cat:"red", tags:["zinfandel","zin"], x:1.5, y:2.0 },
+    { name:"Malbec (Argentina)", cat:"red", tags:["malbec","argentina","mendoza"], x:0.5, y:2.0 },
 
-    { name:"Prosecco (Extra Dry)", tags:["prosecco extra dry","prosecco"], x:2.0, y:-2.0 },
-    { name:"Cava (Brut)", tags:["cava brut","cava"], x:-1.2, y:-2.0 },
-
-    { name:"Vernaccia di San Gimignano", tags:["vernaccia","san gimignano"], x:-2.2, y:-1.6 },
-    { name:"Campania Bianco IGT", tags:["campania bianco","campania","fiano","greco","falanghina"], x:-1.6, y:-1.2 },
+    // BOLDER REDS
+    { name:"Cabernet Sauvignon", cat:"red", tags:["cabernet sauvignon","cabernet","cab"], x:-1.0, y:3.2 },
+    { name:"Syrah / Shiraz", cat:"red", tags:["syrah","shiraz"], x:-0.5, y:2.8 },
+    { name:"Sangiovese (Chianti)", cat:"red", tags:["sangiovese","chianti"], x:-1.5, y:1.8 }
   ];
 
   // ======= CANVAS SETUP =======
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
   const world = { minX:-5, maxX:5, minY:-5, maxY:5 };
+
+  // Your preference zone (tweak if you want)
+  // Center chosen from your described profile: slightly off-dry & lightish.
+  const PREF = { cx: 1.5, cy: -1.0, rx: 1.6, ry: 1.2 }; // ellipse radii
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -151,19 +202,31 @@
   const state = { you: null, wines: [] };
 
   function presets() {
-    state.you = { id:'you', type:'you', name:'You', x:1.5, y:-1.0 };
+    state.you = { id:'you', type:'you', name:'You', x: PREF.cx, y: PREF.cy };
+
+    // start with a few points that match your earlier list
     state.wines = [
-      { id: crypto.randomUUID(), type:'wine', name:'Pinot Grigio', x:-1.5, y:-2.5 },
-      { id: crypto.randomUUID(), type:'wine', name:'Chardonnay', x:0.5, y:-1.5 },
-      { id: crypto.randomUUID(), type:'wine', name:'Riesling (off-dry)', x:2.0, y:-1.0 },
-      { id: crypto.randomUUID(), type:'wine', name:'Moscato', x:3.5, y:-2.0 },
-      { id: crypto.randomUUID(), type:'wine', name:'Malbec (Argentina)', x:0.5, y:2.0 },
-      { id: crypto.randomUUID(), type:'wine', name:'Cabernet Sauvignon', x:-1.0, y:3.0 },
-      { id: crypto.randomUUID(), type:'wine', name:'Sauvignon Blanc', x:-3.0, y:-2.0 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', name:'Pinot Grigio (Italy)', x:-1.5, y:-2.5 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', name:'Chardonnay (Unoaked)', x:-0.2, y:-1.4 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', name:'Riesling (Off-Dry, Kabinett)', x:2.0, y:-1.0 },
+      { id: crypto.randomUUID(), type:'wine', cat:'red', name:'Malbec (Argentina)', x:0.5, y:2.0 },
+      { id: crypto.randomUUID(), type:'wine', cat:'sparkling', name:'Prosecco (Extra Dry)', x:2.0, y:-2.0 }
     ];
   }
   presets();
 
+  // ======= COLOR HELPERS =======
+  function colorForPoint(p){
+    if (p.type === 'you') return getCss('--accent');
+    if (p.cat === 'red') return getCss('--redWine');
+    if (p.cat === 'sparkling') return getCss('--spark');
+    return getCss('--whiteWine');
+  }
+  function getCss(varName){
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
+
+  // ======= DRAWING =======
   function drawAxes(W, H) {
     ctx.lineWidth = 1;
     ctx.strokeStyle = '#e8e8e8';
@@ -199,19 +262,51 @@
     ctx.restore();
   }
 
+  function drawPreferenceZone(){
+    if (!toggleZone.checked) return;
+
+    const { x:cx, y:cy } = w2s(PREF.cx, PREF.cy);
+    const { x:xr } = w2s(PREF.cx + PREF.rx, PREF.cy);
+    const { y:yr } = w2s(PREF.cx, PREF.cy + PREF.ry);
+
+    const rx = Math.abs(xr - cx);
+    const ry = Math.abs(yr - cy);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+
+    ctx.fillStyle = 'rgba(176,0,32,0.10)'; // subtle accent tint
+    ctx.fill();
+
+    ctx.setLineDash([6,6]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(176,0,32,0.45)';
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.font = '700 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.fillStyle = 'rgba(176,0,32,0.75)';
+    ctx.textAlign = 'center';
+    ctx.fillText('Your preference zone', cx, cy - ry - 10);
+    ctx.restore();
+  }
+
   function drawPoint(p) {
     const { x, y } = w2s(p.x, p.y);
+
     const r = p.type === 'you' ? 9 : 6;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.fillStyle = (p.type === 'you') ? '#b00020' : '#777';
+    ctx.fillStyle = colorForPoint(p);
     ctx.fill();
-    ctx.lineWidth = 2;
+
+    ctx.lineWidth = p.type === 'you' ? 3 : 2;
     ctx.strokeStyle = '#111';
     ctx.stroke();
 
     ctx.font = '600 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-    ctx.fillStyle = (p.type === 'you') ? '#b00020' : '#111';
+    ctx.fillStyle = p.type === 'you' ? getCss('--accent') : '#111';
     ctx.textAlign = 'center';
     ctx.fillText(p.name, x, y - 10);
   }
@@ -221,10 +316,12 @@
     const H = canvas.getBoundingClientRect().height;
     ctx.clearRect(0,0,W,H);
     drawAxes(W,H);
+    drawPreferenceZone();
     state.wines.forEach(drawPoint);
     drawPoint(state.you);
   }
 
+  // ======= HIT TEST & DRAGGING =======
   function allPoints() { return [ ...state.wines, state.you ]; }
 
   function hitTest(mx, my) {
@@ -261,13 +358,16 @@
     syncFormIfSelected(dragging);
     draw(); renderList();
   });
+
   window.addEventListener('mouseup', () => dragging = null);
 
+  // click to place "You"
   canvas.addEventListener('click', (e) => {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     if (hitTest(mx, my)) return;
+
     const w = s2w(mx, my);
     state.you.x = clamp(w.x, -5, 5);
     state.you.y = clamp(w.y, -5, 5);
@@ -276,6 +376,7 @@
 
   // ======= UI =======
   const ptype = document.getElementById('ptype');
+  const wcat = document.getElementById('wcat');
   const nameEl = document.getElementById('name');
   const xEl = document.getElementById('x');
   const yEl = document.getElementById('y');
@@ -286,8 +387,11 @@
   const qEl = document.getElementById('q');
   const searchBtn = document.getElementById('search');
   const matchStatus = document.getElementById('matchStatus');
+  const toggleZone = document.getElementById('toggleZone');
 
   let selectedId = null;
+
+  toggleZone.addEventListener('change', () => draw());
 
   function syncFormIfSelected(p) {
     if (!p || p.id !== selectedId) return;
@@ -295,6 +399,7 @@
     nameEl.value = p.name;
     xEl.value = (+p.x).toFixed(1);
     yEl.value = (+p.y).toFixed(1);
+    if (p.type === 'wine' && p.cat) wcat.value = p.cat;
   }
 
   function selectPoint(id) {
@@ -305,6 +410,7 @@
     nameEl.value = p.name;
     xEl.value = (+p.x).toFixed(1);
     yEl.value = (+p.y).toFixed(1);
+    if (p.type === 'wine') wcat.value = p.cat || 'white';
   }
 
   function deleteWine(id) {
@@ -323,11 +429,12 @@
       state.you.name = nm; state.you.x = x; state.you.y = y;
       selectedId = 'you';
     } else {
+      const cat = wcat.value;
       if (selectedId && selectedId !== 'you') {
         const w = state.wines.find(z => z.id === selectedId);
-        if (w) { w.name = nm; w.x = x; w.y = y; }
+        if (w) { w.name = nm; w.x = x; w.y = y; w.cat = cat; }
       } else {
-        state.wines.push({ id: crypto.randomUUID(), type:'wine', name:nm, x, y });
+        state.wines.push({ id: crypto.randomUUID(), type:'wine', cat, name:nm, x, y });
       }
     }
     draw(); renderList();
@@ -339,7 +446,9 @@
     nameEl.value = '';
     xEl.value = 0; yEl.value = 0;
     ptype.value = 'wine';
+    wcat.value = 'white';
     matchStatus.textContent = '';
+    toggleZone.checked = true;
     draw(); renderList();
   });
 
@@ -352,14 +461,12 @@
   }
 
   function scoreEntry(queryTokens, entry){
-    // Score = how many tags match (partial word matches allowed)
     let score = 0;
     const q = queryTokens.join(' ');
     for (const t of entry.tags) {
       const tag = t.toLowerCase();
-      if (q.includes(tag)) score += 3;       // full tag phrase hit
+      if (q.includes(tag)) score += 3;
       else {
-        // partial token hit
         const tagTokens = tokenize(tag);
         const hit = tagTokens.some(tt => queryTokens.includes(tt));
         if (hit) score += 1;
@@ -379,7 +486,6 @@
     }
     if (!best || bestScore <= 0) return null;
 
-    // confidence label
     let confidence = 'low';
     if (bestScore >= 6) confidence = 'high';
     else if (bestScore >= 3) confidence = 'medium';
@@ -387,12 +493,11 @@
     return { ...best, confidence, score: bestScore };
   }
 
-  function upsertWinePoint(name, x, y){
-    // If wine name already exists, update it; else add
+  function upsertWinePoint(name, x, y, cat){
     const existing = state.wines.find(w => w.name.toLowerCase() === name.toLowerCase());
-    if (existing) { existing.x = x; existing.y = y; return existing.id; }
+    if (existing) { existing.x = x; existing.y = y; existing.cat = cat || existing.cat || 'white'; return existing.id; }
     const id = crypto.randomUUID();
-    state.wines.push({ id, type:'wine', name, x, y });
+    state.wines.push({ id, type:'wine', cat: cat || 'white', name, x, y });
     return id;
   }
 
@@ -400,11 +505,11 @@
     const q = qEl.value.trim();
     const hit = autoPlaceFromDictionary(q);
     if (!hit) {
-      matchStatus.innerHTML = `<span class="bad">No match.</span> Add it manually once, then add tags to the dictionary.`;
+      matchStatus.innerHTML = `<span class="bad">No match.</span> Add it manually once, then add tags to the dictionary later.`;
       return;
     }
 
-    const id = upsertWinePoint(hit.name, hit.x, hit.y);
+    const id = upsertWinePoint(hit.name, hit.x, hit.y, hit.cat);
     selectPoint(id);
 
     const cls = hit.confidence === 'high' ? 'ok' : (hit.confidence === 'medium' ? 'warn' : 'bad');
@@ -416,7 +521,7 @@
   });
 
   function renderList() {
-    const items = [{...state.you, label:'You'}, ...state.wines.map(w => ({...w, label:'Wine'}))];
+    const items = [{...state.you, label:'You'}, ...state.wines.map(w => ({...w, label:(w.cat || 'white')}))];
     listEl.innerHTML = `
       <div class="tiny"><span class="pill">Points</span>
         Click <span class="kbd">Edit</span> to load values; drag points on the map any time.
