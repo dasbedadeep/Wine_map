@@ -3,47 +3,55 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Wine Flavor Map</title>
+  <title>Wine Flavor Map (Anchors)</title>
   <style>
     :root{
       --bg:#ffffff; --ink:#111; --muted:#666; --grid:#e8e8e8;
-      --accent:#b00020;        /* you */
-      --whiteWine:#f5f5f5;     /* white */
-      --redWine:#7a0019;       /* red */
-      --spark:#c9a227;         /* sparkling */
+      --me:#b00020;          /* Me */
+      --whiteWine:#f5f5f5;   /* White */
+      --redWine:#7a0019;     /* Red */
+      --spark:#c9a227;       /* Sparkling */
       --stroke:#111;
     }
     body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); }
-    .wrap{ max-width:980px; margin:18px auto; padding:0 14px; }
-    h1{ font-size:20px; margin:0 0 10px; }
+    .wrap{ max-width: 1040px; margin: 18px auto; padding: 0 14px; }
+    h1{ font-size: 20px; margin: 0 0 10px; }
     .row{ display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
-    .card{ border:1px solid #eee; border-radius:14px; padding:12px; box-shadow:0 4px 16px rgba(0,0,0,.05); background:#fff; }
-    .left{ flex:1 1 560px; }
-    .right{ flex:1 1 320px; }
-    canvas{ width:100%; height:520px; display:block; border-radius:12px; background:#fff; }
+    .card{
+      border:1px solid #eee; border-radius:14px; padding:12px;
+      box-shadow:0 4px 16px rgba(0,0,0,.05); background:#fff;
+    }
+    .left{ flex: 1 1 620px; }
+    .right{ flex: 1 1 360px; }
+    canvas{ width:100%; height: 560px; display:block; border-radius:12px; background:#fff; }
     label{ display:block; font-size:12px; color:var(--muted); margin-top:10px; }
-    input,button,select{ width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; font-size:14px; box-sizing:border-box; }
+    input,button,select{
+      width:100%; padding:10px; border:1px solid #ddd; border-radius:10px;
+      font-size:14px; box-sizing:border-box;
+    }
     button{ cursor:pointer; background:#111; color:#fff; border:none; margin-top:10px; }
     button.secondary{ background:#f4f4f4; color:#111; border:1px solid #ddd; }
     .tiny{ font-size:12px; color:var(--muted); line-height:1.35; }
-    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .pill{ display:inline-block; padding:4px 8px; border-radius:999px; background:#f3f3f3; font-size:12px; margin-right:6px; }
-    .list{ max-height:210px; overflow:auto; margin-top:10px; border-top:1px dashed #eee; padding-top:10px; }
-    .item{ display:flex; justify-content:space-between; gap:8px; align-items:center; padding:6px 0; }
-    .item button{ width:auto; padding:6px 10px; margin:0; border-radius:10px; }
-    .item .name{ font-size:14px; }
-    .kbd{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace; font-size:12px; background:#f6f6f6; border:1px solid #eee; border-bottom-width:2px; padding:2px 6px; border-radius:6px; }
-    .ok{ color:#0a7; font-weight:700; }
-    .warn{ color:#c60; font-weight:700; }
-    .bad{ color:#b00020; font-weight:700; }
     .legend{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
     .swatch{ display:inline-flex; align-items:center; gap:6px; }
     .dot{ width:12px; height:12px; border-radius:999px; border:2px solid var(--stroke); display:inline-block; }
+    .list{ max-height: 240px; overflow:auto; margin-top: 10px; border-top:1px dashed #eee; padding-top:10px; }
+    .item{ display:flex; justify-content:space-between; gap:8px; align-items:center; padding: 6px 0; }
+    .item button{ width:auto; padding:6px 10px; margin:0; border-radius:10px; }
+    .item .name{ font-size:14px; }
+    .ok{ color:#0a7; font-weight:700; }
+    .warn{ color:#c60; font-weight:700; }
+    .bad{ color:#b00020; font-weight:700; }
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+          font-size: 12px; background:#f6f6f6; border:1px solid #eee; border-bottom-width:2px; padding:2px 6px; border-radius:6px; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>🍷 Wine Flavor Map — Dry↔Sweet and Light↔Bold</h1>
+    <h1>🍷 Wine Flavor Map — Dry↔Sweet and Light↔Bold (–10 to +10)</h1>
+
     <div class="row">
       <div class="card left">
         <canvas id="c"></canvas>
@@ -52,25 +60,25 @@
           <span class="swatch"><span class="dot" style="background:var(--whiteWine)"></span>White</span>
           <span class="swatch"><span class="dot" style="background:var(--redWine)"></span>Red</span>
           <span class="swatch"><span class="dot" style="background:var(--spark)"></span>Sparkling</span>
-          <span class="swatch"><span class="dot" style="background:var(--accent)"></span>You</span>
-          <span class="swatch"><span class="dot" style="background:rgba(176,0,32,.12); border-style:dashed"></span>Your zone</span>
+          <span class="swatch"><span class="dot" style="background:var(--me)"></span>Me</span>
+          <span class="swatch"><span class="dot" style="background:rgba(176,0,32,.10); border-style:dashed"></span>My zone</span>
         </div>
 
         <div class="tiny" style="margin-top:10px;">
-          <span class="pill">Tip</span>
-          Tap/click to place <b>You</b>. Drag points anytime.
+          <span class="pill">How to use</span>
+          Tap/click to move <b>Me</b>. Drag points to adjust. Labels are shown for <b>anchors</b> and the <b>selected point</b> only (to avoid clutter).
         </div>
       </div>
 
       <div class="card right">
         <div class="tiny">
-          Axes: X = <b>Dry (left)</b> → <b>Sweet (right)</b>, Y = <b>Light (bottom)</b> → <b>Bold (top)</b>.
-          <br>Coordinates range from <b>-5 to +5</b>.
+          Axes: X = <b>Dry (–10)</b> → <b>Sweet (+10)</b>, Y = <b>Light (–10)</b> → <b>Bold (+10)</b>.
+          <br/>This view shows <b>anchors only</b> by default.
         </div>
 
-        <label>🔎 Search & auto-place (Option A)</label>
-        <input id="q" placeholder="e.g., chenin blanc loire / malbec mendoza / prosecco extra dry" />
-        <button id="search">Auto-place from dictionary</button>
+        <label>🔎 Search & auto-place (from 40-wine dictionary)</label>
+        <input id="q" placeholder="e.g., chenin loire / rioja tempranillo / prosecco extra dry" />
+        <button id="search">Add searched wine to map</button>
         <div class="tiny" id="matchStatus" style="margin-top:8px;"></div>
 
         <label style="margin-top:12px;">
@@ -78,15 +86,14 @@
           Show my preference zone
         </label>
 
+        <label style="margin-top:8px;">
+          <input id="toggleAnchorsOnly" type="checkbox" checked style="width:auto; transform:scale(1.05); margin-right:8px;" />
+          Show anchors only (recommended)
+        </label>
+
         <hr style="border:none;border-top:1px solid #eee;margin:14px 0;">
 
-        <label>Point type</label>
-        <select id="ptype">
-          <option value="wine">Wine</option>
-          <option value="you">You (single)</option>
-        </select>
-
-        <label>Wine category (for color)</label>
+        <label>Manual add (optional)</label>
         <select id="wcat">
           <option value="white">White</option>
           <option value="red">Red</option>
@@ -94,27 +101,27 @@
         </select>
 
         <label>Name</label>
-        <input id="name" placeholder="e.g., Chenin Blanc (Loire)" />
+        <input id="name" placeholder="e.g., Rosé (Provence)" />
 
         <div class="grid2">
           <div>
-            <label>X (Dry ←→ Sweet)</label>
-            <input id="x" type="number" step="0.1" min="-5" max="5" value="0">
+            <label>X (Dry ↔ Sweet)</label>
+            <input id="x" type="number" step="0.1" min="-10" max="10" value="0">
           </div>
           <div>
-            <label>Y (Light ↓↑ Bold)</label>
-            <input id="y" type="number" step="0.1" min="-5" max="5" value="0">
+            <label>Y (Light ↔ Bold)</label>
+            <input id="y" type="number" step="0.1" min="-10" max="10" value="0">
           </div>
         </div>
 
         <button id="add">Add / Update Point</button>
-        <button id="reset" class="secondary">Reset to presets</button>
+        <button id="reset" class="secondary">Reset to anchors</button>
 
         <div class="list" id="list"></div>
 
         <div class="tiny" style="margin-top:10px;">
-          <span class="pill">Your zone</span>
-          Shaded area ≈ your stated preference: <b>fresh + fruity + light</b>, avoiding extremes of dry/sweet.
+          <span class="pill">Tip</span>
+          On phone: tap a point → it becomes “selected” and its label shows. Tap empty space → move <b>Me</b>.
         </div>
       </div>
     </div>
@@ -122,261 +129,83 @@
 
 <script>
 (() => {
-  // ======= 25-entry Option A dictionary (with categories) =======
-  // cat: "white" | "red" | "sparkling"
+  // =========================
+  // 40-entry Dictionary (Option A)
+  // X: Dry(-10) .. Sweet(+10)
+  // Y: Light(-10) .. Bold(+10)
+  // cat: "white" | "red" | "sparkling" | "rose"
+  // =========================
   const WINE_DB = [
-    // LIGHT / FRESH WHITES
-    { name:"Pinot Grigio (Italy)", cat:"white", tags:["pinot grigio","grigio","italy","veneto","friuli"], x:-1.8, y:-2.6 },
-    { name:"Albariño (Spain)", cat:"white", tags:["albarino","albariño","rias baixas"], x:-1.2, y:-2.0 },
-    { name:"Verdejo (Spain)", cat:"white", tags:["verdejo","rueda"], x:-1.0, y:-1.8 },
-    { name:"Sauvignon Blanc (Loire/NZ)", cat:"white", tags:["sauvignon blanc","sancerre","marlborough"], x:-3.0, y:-2.0 },
-    { name:"Vernaccia di San Gimignano", cat:"white", tags:["vernaccia","san gimignano"], x:-2.2, y:-1.6 },
+    // ---- Whites (17) ----
+    { name:"Sauvignon Blanc (Loire/NZ)", cat:"white", tags:["sauvignon blanc","sancerre","marlborough"], x:-9.0, y:-6.0 },
+    { name:"Pinot Grigio (Italy)", cat:"white", tags:["pinot grigio","grigio","italy","veneto","friuli"], x:-5.0, y:-7.0 },
+    { name:"Albariño (Rías Baixas)", cat:"white", tags:["albarino","albariño","rias baixas"], x:-4.0, y:-6.0 },
+    { name:"Verdejo (Rueda)", cat:"white", tags:["verdejo","rueda"], x:-4.5, y:-5.5 },
+    { name:"Grüner Veltliner (Austria)", cat:"white", tags:["gruner veltliner","grüner","gruner"], x:-6.0, y:-5.0 },
+    { name:"Vernaccia di San Gimignano", cat:"white", tags:["vernaccia","san gimignano"], x:-6.5, y:-4.5 },
+    { name:"Chenin Blanc (Loire)", cat:"white", tags:["chenin blanc","chenin","vouvray","anjou","saumur"], x:-2.0, y:-3.5 },
+    { name:"Riesling (Off-dry / Kabinett)", cat:"white", tags:["riesling off dry","riesling off-dry","kabinett","mosel"], x: 4.0, y:-3.0 },
+    { name:"Gewürztraminer", cat:"white", tags:["gewurztraminer","gewürztraminer"], x: 6.0, y:-2.0 },
+    { name:"Moscato", cat:"white", tags:["moscato","muscat"], x: 9.0, y:-8.0 },
+    { name:"Pinot Gris (Alsace/Oregon)", cat:"white", tags:["pinot gris","gris","alsace","oregon"], x: 1.0, y:-1.0 },
+    { name:"Viognier", cat:"white", tags:["viognier"], x: 2.0, y: 1.0 },
+    { name:"Chardonnay (Unoaked)", cat:"white", tags:["unoaked chardonnay","chardonnay steel","chablis-style"], x:-3.0, y:-2.0 },
+    { name:"Chardonnay (Oaked)", cat:"white", tags:["oaked chardonnay","buttery chardonnay"], x:-1.0, y: 2.0 },
+    { name:"Fiano (Campania)", cat:"white", tags:["fiano","campania"], x:-3.5, y:-1.0 },
+    { name:"Greco di Tufo", cat:"white", tags:["greco","greco di tufo"], x:-4.0, y:-0.5 },
+    { name:"Torrontés (Argentina)", cat:"white", tags:["torrontes","torrontés"], x: 1.5, y:-3.0 },
 
-    // BALANCED / AROMATIC WHITES
-    { name:"Chenin Blanc (Loire)", cat:"white", tags:["chenin blanc","chenin","vouvray","anjou","saumur"], x:0.2, y:-1.0 },
-    { name:"Riesling (Off-Dry, Kabinett)", cat:"white", tags:["riesling off dry","riesling kabinett","kabinett"], x:2.0, y:-1.0 },
-    { name:"Gewürztraminer", cat:"white", tags:["gewurztraminer","gewürztraminer"], x:2.8, y:-0.8 },
-    { name:"Pinot Gris (Alsace/Oregon)", cat:"white", tags:["pinot gris","alsace","oregon gris"], x:0.4, y:-1.2 },
-    { name:"Viognier", cat:"white", tags:["viognier"], x:0.8, y:-0.5 },
+    // ---- Sparkling (5) ----
+    { name:"Champagne (Brut)", cat:"sparkling", tags:["champagne brut","champagne"], x:-6.0, y:-4.0 },
+    { name:"Prosecco (Extra Dry)", cat:"sparkling", tags:["prosecco extra dry","prosecco"], x: 3.0, y:-7.0 },
+    { name:"Cava (Brut)", cat:"sparkling", tags:["cava brut","cava"], x:-5.5, y:-7.0 },
+    { name:"Crémant (Brut)", cat:"sparkling", tags:["cremant","crémant"], x:-5.0, y:-6.0 },
+    { name:"Lambrusco (Dry)", cat:"sparkling", tags:["lambrusco dry","lambrusco"], x:-1.0, y: 1.0 },
 
-    // CHARDONNAY STYLES
-    { name:"Chardonnay (Unoaked)", cat:"white", tags:["unoaked chardonnay","chardonnay steel","chablis-style"], x:-0.2, y:-1.4 },
-    { name:"Chardonnay (Oaked)", cat:"white", tags:["oaked chardonnay","buttery chardonnay"], x:0.6, y:-0.2 },
+    // ---- Rosé (3) ----
+    { name:"Rosé (Provence, dry)", cat:"rose", tags:["provence rose","provence rosé","dry rose","dry rosé"], x:-5.0, y:-6.5 },
+    { name:"Rosé (Grenache-based)", cat:"rose", tags:["grenache rose","garnacha rose","rosado"], x:-2.0, y:-6.0 },
+    { name:"White Zinfandel", cat:"rose", tags:["white zinfandel","white zin"], x: 6.5, y:-7.5 },
 
-    // SPARKLING
-    { name:"Prosecco (Extra Dry)", cat:"sparkling", tags:["prosecco extra dry","prosecco"], x:2.0, y:-2.0 },
-    { name:"Cava (Brut)", cat:"sparkling", tags:["cava brut","cava"], x:-1.2, y:-2.0 },
-    { name:"Champagne (Brut)", cat:"sparkling", tags:["champagne brut","champagne"], x:-1.5, y:-1.5 },
-
-    // LIGHT / SMOOTH REDS
-    { name:"Pinot Noir (Light)", cat:"red", tags:["pinot noir","burgundy red"], x:-1.2, y:0.5 },
-    { name:"Gamay (Beaujolais)", cat:"red", tags:["gamay","beaujolais"], x:-0.5, y:0.2 },
-
-    // MEDIUM / FRUIT-FORWARD REDS
-    { name:"Merlot (Soft)", cat:"red", tags:["merlot"], x:0.0, y:1.6 },
-    { name:"Grenache / Garnacha", cat:"red", tags:["grenache","garnacha"], x:0.5, y:1.4 },
-    { name:"Tempranillo (Rioja)", cat:"red", tags:["tempranillo","rioja"], x:-0.5, y:1.8 },
-    { name:"Zinfandel (California)", cat:"red", tags:["zinfandel","zin"], x:1.5, y:2.0 },
-    { name:"Malbec (Argentina)", cat:"red", tags:["malbec","argentina","mendoza"], x:0.5, y:2.0 },
-
-    // BOLDER REDS
-    { name:"Cabernet Sauvignon", cat:"red", tags:["cabernet sauvignon","cabernet","cab"], x:-1.0, y:3.2 },
-    { name:"Syrah / Shiraz", cat:"red", tags:["syrah","shiraz"], x:-0.5, y:2.8 },
-    { name:"Sangiovese (Chianti)", cat:"red", tags:["sangiovese","chianti"], x:-1.5, y:1.8 }
+    // ---- Reds (15) ----
+    { name:"Cabernet Sauvignon", cat:"red", tags:["cabernet sauvignon","cabernet","cab"], x:-8.0, y: 8.0 },
+    { name:"Bordeaux Blend (Left Bank)", cat:"red", tags:["bordeaux blend","left bank","medoc","pauillac","margaux"], x:-7.0, y: 7.0 },
+    { name:"Merlot (Soft)", cat:"red", tags:["merlot"], x:-2.0, y: 4.0 },
+    { name:"Malbec (Argentina)", cat:"red", tags:["malbec","argentina","mendoza"], x:-3.0, y: 5.0 },
+    { name:"Sangiovese (Chianti)", cat:"red", tags:["sangiovese","chianti"], x:-6.0, y: 4.0 },
+    { name:"Pinot Noir (Light)", cat:"red", tags:["pinot noir","burgundy red"], x:-4.0, y: 1.0 },
+    { name:"Gamay (Beaujolais)", cat:"red", tags:["gamay","beaujolais"], x:-2.5, y: 0.5 },
+    { name:"Zinfandel (California)", cat:"red", tags:["zinfandel","zin"], x: 1.0, y: 5.0 },
+    { name:"Syrah / Shiraz", cat:"red", tags:["syrah","shiraz"], x:-6.5, y: 8.0 },
+    { name:"Tempranillo (Rioja)", cat:"red", tags:["tempranillo","rioja"], x:-5.0, y: 5.0 },
+    { name:"Grenache / Garnacha", cat:"red", tags:["grenache","garnacha"], x: 0.5, y: 4.0 },
+    { name:"Côtes du Rhône (Blend)", cat:"red", tags:["cotes du rhone","côtes du rhône","rhone blend"], x:-3.5, y: 4.5 },
+    { name:"Barbera (Italy)", cat:"red", tags:["barbera"], x:-3.0, y: 3.5 },
+    { name:"Montepulciano d'Abruzzo", cat:"red", tags:["montepulciano d abruzzo","montepulciano"], x:-2.5, y: 4.5 },
+    { name:"Primitivo (Italy)", cat:"red", tags:["primitivo"], x: 1.5, y: 5.5 }
   ];
 
-  // ======= CANVAS SETUP =======
+  // =========================
+  // Canvas setup
+  // =========================
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
-  const world = { minX:-5, maxX:5, minY:-5, maxY:5 };
 
-  // Your preference zone (tweak if you want)
-  // Center chosen from your described profile: slightly off-dry & lightish.
-  const PREF = { cx: 1.5, cy: -1.0, rx: 1.6, ry: 1.2 }; // ellipse radii
+  const world = { minX:-10, maxX:10, minY:-10, maxY:10 };
 
-  function resize() {
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.width = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    draw();
-  }
-  window.addEventListener('resize', resize);
+  // Preference zone (ellipse): tuned to your stated profile
+  // Fresh + fruity + light, avoiding extremes of dry/sweet
+  const PREF = { cx: 2.0, cy: -2.0, rx: 3.0, ry: 3.0 };
 
-  function w2s(x, y) {
-    const W = canvas.getBoundingClientRect().width;
-    const H = canvas.getBoundingClientRect().height;
-    const px = (x - world.minX) / (world.maxX - world.minX) * W;
-    const py = H - (y - world.minY) / (world.maxY - world.minY) * H;
-    return { x:px, y:py };
-  }
-  function s2w(px, py) {
-    const W = canvas.getBoundingClientRect().width;
-    const H = canvas.getBoundingClientRect().height;
-    const x = world.minX + (px / W) * (world.maxX - world.minX);
-    const y = world.minY + ((H - py) / H) * (world.maxY - world.minY);
-    return { x, y };
-  }
+  // UI elements
+  const qEl = document.getElementById('q');
+  const searchBtn = document.getElementById('search');
+  const matchStatus = document.getElementById('matchStatus');
 
-  const state = { you: null, wines: [] };
+  const toggleZone = document.getElementById('toggleZone');
+  const toggleAnchorsOnly = document.getElementById('toggleAnchorsOnly');
 
-  function presets() {
-    state.you = { id:'you', type:'you', name:'You', x: PREF.cx, y: PREF.cy };
-
-    // start with a few points that match your earlier list
-    state.wines = [
-      { id: crypto.randomUUID(), type:'wine', cat:'white', name:'Pinot Grigio (Italy)', x:-1.5, y:-2.5 },
-      { id: crypto.randomUUID(), type:'wine', cat:'white', name:'Chardonnay (Unoaked)', x:-0.2, y:-1.4 },
-      { id: crypto.randomUUID(), type:'wine', cat:'white', name:'Riesling (Off-Dry, Kabinett)', x:2.0, y:-1.0 },
-      { id: crypto.randomUUID(), type:'wine', cat:'red', name:'Malbec (Argentina)', x:0.5, y:2.0 },
-      { id: crypto.randomUUID(), type:'wine', cat:'sparkling', name:'Prosecco (Extra Dry)', x:2.0, y:-2.0 }
-    ];
-  }
-  presets();
-
-  // ======= COLOR HELPERS =======
-  function colorForPoint(p){
-    if (p.type === 'you') return getCss('--accent');
-    if (p.cat === 'red') return getCss('--redWine');
-    if (p.cat === 'sparkling') return getCss('--spark');
-    return getCss('--whiteWine');
-  }
-  function getCss(varName){
-    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-  }
-
-  // ======= DRAWING =======
-  function drawAxes(W, H) {
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = '#e8e8e8';
-    for (let i=1;i<10;i++){
-      const gx = i/10 * W;
-      const gy = i/10 * H;
-      ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
-    }
-
-    const mid = w2s(0,0);
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(mid.x, 0); ctx.lineTo(mid.x, H); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, mid.y); ctx.lineTo(W, mid.y); ctx.stroke();
-
-    ctx.fillStyle = '#111';
-    ctx.font = '700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('← Drier', W*0.25, H - 14);
-    ctx.fillText('Sweeter →', W*0.75, H - 14);
-
-    ctx.save();
-    ctx.translate(14, H*0.25);
-    ctx.rotate(-Math.PI/2);
-    ctx.fillText('Bolder ↑', 0, 0);
-    ctx.restore();
-
-    ctx.save();
-    ctx.translate(14, H*0.75);
-    ctx.rotate(-Math.PI/2);
-    ctx.fillText('Light ↓', 0, 0);
-    ctx.restore();
-  }
-
-  function drawPreferenceZone(){
-    if (!toggleZone.checked) return;
-
-    const { x:cx, y:cy } = w2s(PREF.cx, PREF.cy);
-    const { x:xr } = w2s(PREF.cx + PREF.rx, PREF.cy);
-    const { y:yr } = w2s(PREF.cx, PREF.cy + PREF.ry);
-
-    const rx = Math.abs(xr - cx);
-    const ry = Math.abs(yr - cy);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
-
-    ctx.fillStyle = 'rgba(176,0,32,0.10)'; // subtle accent tint
-    ctx.fill();
-
-    ctx.setLineDash([6,6]);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = 'rgba(176,0,32,0.45)';
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.font = '700 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-    ctx.fillStyle = 'rgba(176,0,32,0.75)';
-    ctx.textAlign = 'center';
-    ctx.fillText('Your preference zone', cx, cy - ry - 10);
-    ctx.restore();
-  }
-
-  function drawPoint(p) {
-    const { x, y } = w2s(p.x, p.y);
-
-    const r = p.type === 'you' ? 9 : 6;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.fillStyle = colorForPoint(p);
-    ctx.fill();
-
-    ctx.lineWidth = p.type === 'you' ? 3 : 2;
-    ctx.strokeStyle = '#111';
-    ctx.stroke();
-
-    ctx.font = '600 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-    ctx.fillStyle = p.type === 'you' ? getCss('--accent') : '#111';
-    ctx.textAlign = 'center';
-    ctx.fillText(p.name, x, y - 10);
-  }
-
-  function draw() {
-    const W = canvas.getBoundingClientRect().width;
-    const H = canvas.getBoundingClientRect().height;
-    ctx.clearRect(0,0,W,H);
-    drawAxes(W,H);
-    drawPreferenceZone();
-    state.wines.forEach(drawPoint);
-    drawPoint(state.you);
-  }
-
-  // ======= HIT TEST & DRAGGING =======
-  function allPoints() { return [ ...state.wines, state.you ]; }
-
-  function hitTest(mx, my) {
-    const pts = allPoints();
-    for (let i=pts.length-1;i>=0;i--) {
-      const p = pts[i];
-      const s = w2s(p.x, p.y);
-      const r = (p.type === 'you') ? 12 : 10;
-      const dx = mx - s.x, dy = my - s.y;
-      if (dx*dx + dy*dy <= r*r) return p;
-    }
-    return null;
-  }
-
-  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-
-  let dragging = null;
-  canvas.addEventListener('mousedown', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    const p = hitTest(mx, my);
-    if (p) dragging = p;
-  });
-
-  canvas.addEventListener('mousemove', (e) => {
-    if (!dragging) return;
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    const w = s2w(mx, my);
-    dragging.x = clamp(w.x, -5, 5);
-    dragging.y = clamp(w.y, -5, 5);
-    syncFormIfSelected(dragging);
-    draw(); renderList();
-  });
-
-  window.addEventListener('mouseup', () => dragging = null);
-
-  // click to place "You"
-  canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    if (hitTest(mx, my)) return;
-
-    const w = s2w(mx, my);
-    state.you.x = clamp(w.x, -5, 5);
-    state.you.y = clamp(w.y, -5, 5);
-    draw(); renderList();
-  });
-
-  // ======= UI =======
-  const ptype = document.getElementById('ptype');
-  const wcat = document.getElementById('wcat');
+  const wcatEl = document.getElementById('wcat');
   const nameEl = document.getElementById('name');
   const xEl = document.getElementById('x');
   const yEl = document.getElementById('y');
@@ -384,73 +213,27 @@
   const resetBtn = document.getElementById('reset');
   const listEl = document.getElementById('list');
 
-  const qEl = document.getElementById('q');
-  const searchBtn = document.getElementById('search');
-  const matchStatus = document.getElementById('matchStatus');
-  const toggleZone = document.getElementById('toggleZone');
-
+  // =========================
+  // State
+  // =========================
+  const state = { me: null, wines: [] };
   let selectedId = null;
+  let dragging = null;
 
-  toggleZone.addEventListener('change', () => draw());
+  // =========================
+  // Helpers
+  // =========================
+  function getCss(varName){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
 
-  function syncFormIfSelected(p) {
-    if (!p || p.id !== selectedId) return;
-    ptype.value = p.type;
-    nameEl.value = p.name;
-    xEl.value = (+p.x).toFixed(1);
-    yEl.value = (+p.y).toFixed(1);
-    if (p.type === 'wine' && p.cat) wcat.value = p.cat;
+  function colorForPoint(p){
+    if (p.type === 'me') return getCss('--me');
+    if (p.cat === 'red') return getCss('--redWine');
+    if (p.cat === 'sparkling') return getCss('--spark');
+    // rose and white both look like "light" category on purpose; if you want pink, tell me.
+    return getCss('--whiteWine');
   }
 
-  function selectPoint(id) {
-    selectedId = id;
-    const p = (id === 'you') ? state.you : state.wines.find(w => w.id === id);
-    if (!p) return;
-    ptype.value = p.type;
-    nameEl.value = p.name;
-    xEl.value = (+p.x).toFixed(1);
-    yEl.value = (+p.y).toFixed(1);
-    if (p.type === 'wine') wcat.value = p.cat || 'white';
-  }
-
-  function deleteWine(id) {
-    state.wines = state.wines.filter(w => w.id !== id);
-    if (selectedId === id) selectedId = null;
-    draw(); renderList();
-  }
-
-  addBtn.addEventListener('click', () => {
-    const type = ptype.value;
-    const nm = (nameEl.value || '').trim() || (type === 'you' ? 'You' : 'Wine');
-    const x = clamp(parseFloat(xEl.value || '0'), -5, 5);
-    const y = clamp(parseFloat(yEl.value || '0'), -5, 5);
-
-    if (type === 'you') {
-      state.you.name = nm; state.you.x = x; state.you.y = y;
-      selectedId = 'you';
-    } else {
-      const cat = wcat.value;
-      if (selectedId && selectedId !== 'you') {
-        const w = state.wines.find(z => z.id === selectedId);
-        if (w) { w.name = nm; w.x = x; w.y = y; w.cat = cat; }
-      } else {
-        state.wines.push({ id: crypto.randomUUID(), type:'wine', cat, name:nm, x, y });
-      }
-    }
-    draw(); renderList();
-  });
-
-  resetBtn.addEventListener('click', () => {
-    presets();
-    selectedId = null;
-    nameEl.value = '';
-    xEl.value = 0; yEl.value = 0;
-    ptype.value = 'wine';
-    wcat.value = 'white';
-    matchStatus.textContent = '';
-    toggleZone.checked = true;
-    draw(); renderList();
-  });
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
 
   function tokenize(s){
     return (s || '')
@@ -465,7 +248,7 @@
     const q = queryTokens.join(' ');
     for (const t of entry.tags) {
       const tag = t.toLowerCase();
-      if (q.includes(tag)) score += 3;
+      if (q.includes(tag)) score += 4; // strong phrase hit
       else {
         const tagTokens = tokenize(tag);
         const hit = tagTokens.some(tt => queryTokens.includes(tt));
@@ -487,66 +270,401 @@
     if (!best || bestScore <= 0) return null;
 
     let confidence = 'low';
-    if (bestScore >= 6) confidence = 'high';
-    else if (bestScore >= 3) confidence = 'medium';
+    if (bestScore >= 8) confidence = 'high';
+    else if (bestScore >= 4) confidence = 'medium';
 
     return { ...best, confidence, score: bestScore };
   }
 
-  function upsertWinePoint(name, x, y, cat){
+  function upsertWinePoint(name, x, y, cat, anchor=false){
     const existing = state.wines.find(w => w.name.toLowerCase() === name.toLowerCase());
-    if (existing) { existing.x = x; existing.y = y; existing.cat = cat || existing.cat || 'white'; return existing.id; }
+    if (existing) { existing.x = x; existing.y = y; existing.cat = cat || existing.cat; existing.anchor = !!anchor; return existing.id; }
     const id = crypto.randomUUID();
-    state.wines.push({ id, type:'wine', cat: cat || 'white', name, x, y });
+    state.wines.push({ id, type:'wine', cat: cat || 'white', name, x, y, anchor: !!anchor });
     return id;
-  }
-
-  searchBtn.addEventListener('click', () => {
-    const q = qEl.value.trim();
-    const hit = autoPlaceFromDictionary(q);
-    if (!hit) {
-      matchStatus.innerHTML = `<span class="bad">No match.</span> Add it manually once, then add tags to the dictionary later.`;
-      return;
-    }
-
-    const id = upsertWinePoint(hit.name, hit.x, hit.y, hit.cat);
-    selectPoint(id);
-
-    const cls = hit.confidence === 'high' ? 'ok' : (hit.confidence === 'medium' ? 'warn' : 'bad');
-    matchStatus.innerHTML =
-      `Match: <b>${escapeHtml(hit.name)}</b> → x=${hit.x.toFixed(1)}, y=${hit.y.toFixed(1)} ` +
-      `(<span class="${cls}">${hit.confidence} confidence</span>)`;
-
-    draw(); renderList();
-  });
-
-  function renderList() {
-    const items = [{...state.you, label:'You'}, ...state.wines.map(w => ({...w, label:(w.cat || 'white')}))];
-    listEl.innerHTML = `
-      <div class="tiny"><span class="pill">Points</span>
-        Click <span class="kbd">Edit</span> to load values; drag points on the map any time.
-      </div>
-      ${items.map(p => `
-        <div class="item">
-          <div>
-            <div class="name"><b>${escapeHtml(p.name)}</b> <span class="tiny">(${p.label})</span></div>
-            <div class="tiny">x=${p.x.toFixed(1)}, y=${p.y.toFixed(1)}</div>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <button class="secondary" data-edit="${p.id}">Edit</button>
-            ${p.id !== 'you' ? `<button class="secondary" data-del="${p.id}">Del</button>` : ``}
-          </div>
-        </div>
-      `).join('')}
-    `;
-    listEl.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => selectPoint(btn.dataset.edit)));
-    listEl.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => deleteWine(btn.dataset.del)));
   }
 
   function escapeHtml(s){
     return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  // =========================
+  // Coordinate transforms
+  // =========================
+  function w2s(x, y) {
+    const W = canvas.getBoundingClientRect().width;
+    const H = canvas.getBoundingClientRect().height;
+    const px = (x - world.minX) / (world.maxX - world.minX) * W;
+    const py = H - (y - world.minY) / (world.maxY - world.minY) * H;
+    return { x:px, y:py };
+  }
+  function s2w(px, py) {
+    const W = canvas.getBoundingClientRect().width;
+    const H = canvas.getBoundingClientRect().height;
+    const x = world.minX + (px / W) * (world.maxX - world.minX);
+    const y = world.minY + ((H - py) / H) * (world.maxY - world.minY);
+    return { x, y };
+  }
+
+  // =========================
+  // Presets: Anchors only
+  // =========================
+  function presets() {
+    state.me = { id:'me', type:'me', name:'Me', x: PREF.cx, y: PREF.cy };
+
+    state.wines = [
+      // Reds (anchors)
+      { id: crypto.randomUUID(), type:'wine', cat:'red', anchor:true, name:'Cabernet Sauvignon', x:-8, y: 8 },
+      { id: crypto.randomUUID(), type:'wine', cat:'red', anchor:true, name:'Bordeaux Blend', x:-7, y: 7 },
+      { id: crypto.randomUUID(), type:'wine', cat:'red', anchor:true, name:'Malbec', x:-3, y: 5 },
+      { id: crypto.randomUUID(), type:'wine', cat:'red', anchor:true, name:'Sangiovese', x:-6, y: 4 },
+      { id: crypto.randomUUID(), type:'wine', cat:'red', anchor:true, name:'Pinot Noir', x:-4, y: 1 },
+      { id: crypto.randomUUID(), type:'wine', cat:'red', anchor:true, name:'Zinfandel', x: 1, y: 5 },
+      { id: crypto.randomUUID(), type:'wine', cat:'red', anchor:true, name:'Merlot', x:-2, y: 4 },
+
+      // Whites (anchors)
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Chardonnay', x:-1, y: 2 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Viognier', x: 2, y: 1 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Pinot Gris', x: 1, y:-1 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Pinot Grigio', x:-5, y:-7 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Sauvignon Blanc', x:-9, y:-6 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Riesling', x: 4, y:-3 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Gewürztraminer', x: 6, y:-2 },
+      { id: crypto.randomUUID(), type:'wine', cat:'white', anchor:true, name:'Moscato', x: 9, y:-8 },
+
+      // Sparkling (anchors)
+      { id: crypto.randomUUID(), type:'wine', cat:'sparkling', anchor:true, name:'Champagne', x:-6, y:-4 },
+      { id: crypto.randomUUID(), type:'wine', cat:'sparkling', anchor:true, name:'Prosecco', x: 3, y:-7 }
+    ];
+  }
+
+  // =========================
+  // Drawing
+  // =========================
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw();
+  }
+  window.addEventListener('resize', resize);
+
+  function drawAxes(W, H) {
+    // Grid
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = getCss('--grid');
+    for (let i=1;i<20;i++){
+      const gx = i/20 * W;
+      const gy = i/20 * H;
+      ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
+    }
+
+    // Axes
+    const mid = w2s(0,0);
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(mid.x, 0); ctx.lineTo(mid.x, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, mid.y); ctx.lineTo(W, mid.y); ctx.stroke();
+
+    // Labels
+    ctx.fillStyle = '#111';
+    ctx.font = '700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('← Drier', W*0.25, H - 14);
+    ctx.fillText('Sweeter →', W*0.75, H - 14);
+
+    ctx.save();
+    ctx.translate(16, H*0.25);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('Bolder ↑', 0, 0);
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(16, H*0.75);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('Light ↓', 0, 0);
+    ctx.restore();
+
+    // Tick-ish labels (minimal, non-clutter)
+    ctx.font = '600 11px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.fillStyle = '#333';
+    const ticks = [-10,-5,0,5,10];
+    for (const t of ticks){
+      const px = w2s(t,0).x;
+      ctx.fillText(String(t), px, w2s(0,-10).y + 14);
+      const py = w2s(0,t).y;
+      ctx.fillText(String(t), w2s(-10,0).x + 18, py+4);
+    }
+  }
+
+  function drawPreferenceZone(){
+    if (!toggleZone.checked) return;
+
+    const { x:cx, y:cy } = w2s(PREF.cx, PREF.cy);
+    const { x:xr } = w2s(PREF.cx + PREF.rx, PREF.cy);
+    const { y:yr } = w2s(PREF.cx, PREF.cy + PREF.ry);
+    const rx = Math.abs(xr - cx);
+    const ry = Math.abs(yr - cy);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(176,0,32,0.10)';
+    ctx.fill();
+
+    ctx.setLineDash([6,6]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(176,0,32,0.45)';
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.font = '700 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.fillStyle = 'rgba(176,0,32,0.75)';
+    ctx.textAlign = 'center';
+    ctx.fillText('My preference zone', cx, cy - ry - 10);
+    ctx.restore();
+  }
+
+  function shouldRenderPoint(p){
+    if (p.type === 'me') return true;
+    if (!toggleAnchorsOnly.checked) return true;
+    return !!p.anchor;
+  }
+
+  function drawPoint(p) {
+    const { x, y } = w2s(p.x, p.y);
+    const r = (p.type === 'me') ? 10 : 7;
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = colorForPoint(p);
+    ctx.fill();
+
+    ctx.lineWidth = (p.type === 'me') ? 3 : 2;
+    ctx.strokeStyle = '#111';
+    ctx.stroke();
+
+    // Labels: anchors + selected + Me only (to avoid clutter)
+    const showLabel = (p.type === 'me') || (!!p.anchor) || (p.id === selectedId);
+    if (showLabel) {
+      ctx.font = '600 12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.fillStyle = '#111';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.name, x, y - 12);
+    }
+  }
+
+  function draw() {
+    const W = canvas.getBoundingClientRect().width;
+    const H = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0,0,W,H);
+    drawAxes(W,H);
+    drawPreferenceZone();
+
+    // Wines
+    state.wines.forEach(p => { if (shouldRenderPoint(p)) drawPoint(p); });
+
+    // Me on top
+    drawPoint(state.me);
+  }
+
+  // =========================
+  // Hit test + drag
+  // =========================
+  function allPoints(){ return [ ...state.wines, state.me ]; }
+
+  function hitTest(mx, my) {
+    const pts = allPoints().filter(shouldRenderPoint);
+    // make sure Me gets priority
+    pts.sort((a,b) => (a.type === 'me' ? 1 : 0) - (b.type === 'me' ? 1 : 0));
+    for (let i=pts.length-1;i>=0;i--) {
+      const p = pts[i];
+      const s = w2s(p.x, p.y);
+      const rr = (p.type === 'me') ? 14 : 12;
+      const dx = mx - s.x, dy = my - s.y;
+      if (dx*dx + dy*dy <= rr*rr) return p;
+    }
+    return null;
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const p = hitTest(mx, my);
+    if (p) {
+      dragging = p;
+      selectedId = p.id;
+      syncFormIfSelected(p);
+      draw(); renderList();
+    }
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const w = s2w(mx, my);
+    dragging.x = clamp(w.x, -10, 10);
+    dragging.y = clamp(w.y, -10, 10);
+    syncFormIfSelected(dragging);
+    draw(); renderList();
+  });
+
+  window.addEventListener('mouseup', () => dragging = null);
+
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const p = hitTest(mx, my);
+    if (p) {
+      selectedId = p.id;
+      syncFormIfSelected(p);
+      draw(); renderList();
+      return;
+    }
+
+    // click empty space => move Me
+    const w = s2w(mx, my);
+    state.me.x = clamp(w.x, -10, 10);
+    state.me.y = clamp(w.y, -10, 10);
+    selectedId = state.me.id;
+    syncFormIfSelected(state.me);
+    draw(); renderList();
+  });
+
+  // =========================
+  // UI interactions
+  // =========================
+  toggleZone.addEventListener('change', () => draw());
+  toggleAnchorsOnly.addEventListener('change', () => { selectedId = null; draw(); renderList(); });
+
+  function syncFormIfSelected(p){
+    if (!p || p.id !== selectedId) return;
+    nameEl.value = p.name || '';
+    xEl.value = (+p.x).toFixed(1);
+    yEl.value = (+p.y).toFixed(1);
+    if (p.type === 'wine') wcatEl.value = p.cat || 'white';
+  }
+
+  function selectPoint(id){
+    selectedId = id;
+    const p = (id === state.me.id) ? state.me : state.wines.find(w => w.id === id);
+    if (!p) return;
+    syncFormIfSelected(p);
+    draw(); renderList();
+  }
+
+  function deleteWine(id){
+    const w = state.wines.find(x => x.id === id);
+    // Don't delete anchors (keep anchor-only stable)
+    if (w && w.anchor) return;
+    state.wines = state.wines.filter(x => x.id !== id);
+    if (selectedId === id) selectedId = null;
+    draw(); renderList();
+  }
+
+  addBtn.addEventListener('click', () => {
+    const nm = (nameEl.value || '').trim() || 'Wine';
+    const x = clamp(parseFloat(xEl.value || '0'), -10, 10);
+    const y = clamp(parseFloat(yEl.value || '0'), -10, 10);
+    const cat = wcatEl.value || 'white';
+
+    if (selectedId && selectedId !== state.me.id) {
+      const w = state.wines.find(z => z.id === selectedId);
+      if (w && !w.anchor) { w.name = nm; w.x = x; w.y = y; w.cat = cat; }
+      else {
+        // if selected is anchor or none, add a new non-anchor point
+        const id = upsertWinePoint(nm, x, y, cat, false);
+        selectedId = id;
+      }
+    } else {
+      const id = upsertWinePoint(nm, x, y, cat, false);
+      selectedId = id;
+    }
+
+    draw(); renderList();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    presets();
+    selectedId = null;
+    matchStatus.textContent = '';
+    nameEl.value = '';
+    xEl.value = 0; yEl.value = 0;
+    wcatEl.value = 'white';
+    toggleZone.checked = true;
+    toggleAnchorsOnly.checked = true;
+    draw(); renderList();
+  });
+
+  searchBtn.addEventListener('click', () => {
+    const q = qEl.value.trim();
+    const hit = autoPlaceFromDictionary(q);
+    if (!hit) {
+      matchStatus.innerHTML = `<span class="bad">No match.</span> Try a simpler keyword (e.g., “rioja”, “chenin”, “prosecco”).`;
+      return;
+    }
+    // Add as non-anchor (so anchors-only view stays clean unless you toggle it off)
+    const id = upsertWinePoint(hit.name, hit.x, hit.y, hit.cat, false);
+    selectedId = id;
+
+    const cls = hit.confidence === 'high' ? 'ok' : (hit.confidence === 'medium' ? 'warn' : 'bad');
+    matchStatus.innerHTML =
+      `Added: <b>${escapeHtml(hit.name)}</b> → x=${hit.x.toFixed(1)}, y=${hit.y.toFixed(1)} ` +
+      `(<span class="${cls}">${hit.confidence} confidence</span>)`;
+
+    syncFormIfSelected(state.wines.find(w => w.id === id));
+    draw(); renderList();
+  });
+
+  function renderList(){
+    // Show anchors + any added non-anchors, but with anchors protected.
+    const winesSorted = [...state.wines].sort((a,b) => (b.anchor===true) - (a.anchor===true) || a.name.localeCompare(b.name));
+    const items = [
+      { ...state.me, label:'Me', anchor:true },
+      ...winesSorted.map(w => ({ ...w, label: w.cat || 'white' }))
+    ];
+
+    listEl.innerHTML = `
+      <div class="tiny"><span class="pill">Points</span>
+        Tap <span class="kbd">Edit</span> to select (label shows). Anchors are locked from deletion.
+      </div>
+      ${items.map(p => `
+        <div class="item">
+          <div>
+            <div class="name">
+              <b>${escapeHtml(p.name)}</b>
+              <span class="tiny">(${escapeHtml(p.label)}${p.anchor ? ', anchor' : ''})</span>
+            </div>
+            <div class="tiny">x=${(+p.x).toFixed(1)}, y=${(+p.y).toFixed(1)}</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="secondary" data-edit="${p.id}">Edit</button>
+            ${p.id !== state.me.id && !p.anchor ? `<button class="secondary" data-del="${p.id}">Del</button>` : ``}
+          </div>
+        </div>
+      `).join('')}
+    `;
+
+    listEl.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => selectPoint(btn.dataset.edit));
+    });
+    listEl.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => deleteWine(btn.dataset.del));
+    });
+  }
+
+  // =========================
+  // Init
+  // =========================
+  presets();
   renderList();
   resize();
 })();
